@@ -1,0 +1,71 @@
+.App {
+  display: flex;
+  
+}
+
+.loanMetaData {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 35%;
+}
+
+.loanMetaData td, .loanMetaData th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.loanMetaData tr:nth-child(even){background-color: #f2f2f2;}
+
+.loanMetaData tr:hover {background-color: #ddd;}
+
+.loanMetaData th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4357AD;
+  color: white;
+  height: 150px;
+}
+
+.loanNum {
+  width: 80px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.loanNum input {
+  width: 50%;
+}
+
+.loanColor {
+  width: 45px;
+}
+
+.colorSwatch {
+  width: 38px;
+}
+
+.initBalance{
+  width: 100px;
+}
+
+.initBalance input {
+  width: 90px;
+}
+
+.metadata {
+  left: 0;
+  position: sticky;
+  z-index: 20;
+  display: flex;
+}
+
+.metadata td {
+  height: 39px;
+  background-color: white;
+  display: flex;
+}
+
+.header {
+  height: 40px !important;
+}
