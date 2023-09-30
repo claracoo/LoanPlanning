@@ -77,12 +77,17 @@ function App() {
         year++;
       }
     }
+    
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 12; j++) {
         let nextMonth = month + j;
-        if (nextMonth > 12) nextMonth %= 12;
-        tempMonthData.push(String(nextMonth) + "/" + String(year + i))
+        if (nextMonth <= 12) {
+          let newMonth = String(nextMonth) + "/" + String(year + i)
+          console.log(newMonth)
+          tempMonthData.push(newMonth)
+        }
       }
+      month = 1;
     }
     setMonths(tempMonthData)
 
@@ -122,13 +127,39 @@ function App() {
     </Fragment>
   );
 
+  const getNextMonth = (currentMonth) => {
+    let nextMonth = "";
+    let month = Number(currentMonth.split("/")[0]);
+    let year = Number(currentMonth.split("/")[1]);
+
+    if (month == 12) {
+      nextMonth += ("1/" + String(year + 1))
+    }
+    else {
+      nextMonth += (String(month + 1) + "/" + String(year))
+    }
+    return nextMonth;
+  }
+
+  const updateDataField = (event, month, loanNum) => {
+    let tempLoanData = [...rows]
+    let currentMonth = month;
+    for (let i = 0; i < 11; i++) {
+      console.log(currentMonth, tempLoanData[loanNum - 1][currentMonth])
+      tempLoanData[loanNum - 1][currentMonth].amount = event.target.value;
+      currentMonth = getNextMonth(currentMonth);
+    }
+    setRows(tempLoanData)
+    calcBalanceLeft(loanNum - 1, tempLoanData)
+  }
+
   const monthData = (loanNum) => {
     let loan = rows[loanNum - 1]
     return(
     months.map((month) => 
     <Fragment key={month}>
           <td>
-            <input type="text" id="amtPaid" name="amtPaid" placeholder="0" />
+            <input onChange={event => updateDataField(event, month, loanNum)} value={loan[month].amount} type="text" id="amtPaid" name="amtPaid" placeholder="0" />
           </td>
           <td>Until Paid Off</td>
           <td>{loan[month].balanceLeft}</td>
