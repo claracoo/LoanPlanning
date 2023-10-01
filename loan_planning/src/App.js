@@ -36,9 +36,26 @@ function App() {
     tempLoanData[index][field] = event.target.value
     setRows(tempLoanData)
     if (field == "initBalance" || field == "interestRate") {
-      console.log(index)
       calcBalanceLeft(index, tempLoanData)
     }
+  }
+
+  const adjustAmountPaidForBeyond0 = (index, rowData) => {
+    let tempLoanData = rowData
+    for (let month of months) {
+      if (month != String((new Date()).getMonth() + 1) + "/" +  String((new Date()).getFullYear())) {
+        let prevMonthBalance = Number(tempLoanData[index][getPrevMonth(month)].balanceLeft)
+        let newMonthBalance = ((prevMonthBalance * Math.pow(1 + ((Number(tempLoanData[index].interestRate) / 100) / 365), tempLoanData[index][getPrevMonth(month)].daysInMonth))).toFixed(2);
+        if (newMonthBalance <= Number(tempLoanData[index][month].amount)) {
+          tempLoanData[index][month].amount = Number(newMonthBalance);
+        }
+        else if (Number(tempLoanData[index][month].balanceLeft) == 0) {
+          tempLoanData[index][month].amount = 0;
+        }
+        tempLoanData[index][month].balanceLeft = Number(tempLoanData[index][month].balanceLeft)
+      }
+    }
+    setRows(tempLoanData);
   }
 
   const calcBalanceLeft = (index, data) => {
@@ -56,10 +73,12 @@ function App() {
           prevMonthBalance = loan[months[i - 1]].balanceLeft
           daysSinceLastPaid = loan[months[i - 1]].daysInMonth
         }
-        let newMonthBalance = (prevMonthBalance * Math.pow(1 + ((loan.interestRate / 100) / 365), daysSinceLastPaid)) - loan[months[i]].amount;
-        loan[months[i]].balanceLeft = newMonthBalance.toFixed(2);
+        let newMonthBalance = ((prevMonthBalance * Math.pow(1 + ((loan.interestRate / 100) / 365), daysSinceLastPaid)) - loan[months[i]].amount).toFixed(2);
+        if (newMonthBalance >= 0) loan[months[i]].balanceLeft = newMonthBalance;
+        else loan[months[i]].balanceLeft = 0;
       }
       setRows(tempRowData)
+      adjustAmountPaidForBeyond0(index, tempRowData);
     }
   }
 
@@ -83,7 +102,6 @@ function App() {
         let nextMonth = month + j;
         if (nextMonth <= 12) {
           let newMonth = String(nextMonth) + "/" + String(year + i)
-          console.log(newMonth)
           tempMonthData.push(newMonth)
         }
       }
@@ -141,11 +159,25 @@ function App() {
     return nextMonth;
   }
 
+  const getPrevMonth = (currentMonth) => {
+    let prevMonth = "";
+    let month = Number(currentMonth.split("/")[0]);
+    let year = Number(currentMonth.split("/")[1]);
+
+    if (month == 1) {
+      prevMonth += ("12/" + String(year - 1))
+    }
+    else {
+      prevMonth += (String(month - 1) + "/" + String(year))
+    }
+    return prevMonth;
+  }
+
   const updateDataField = (event, month, loanNum) => {
     let tempLoanData = [...rows]
     let currentMonth = month;
-    for (let i = 0; i < 11; i++) {
-      console.log(currentMonth, tempLoanData[loanNum - 1][currentMonth])
+    const isCurrentMonth = (element) => element == currentMonth;
+    for (let i = months.findIndex(isCurrentMonth); i < months.length; i++) {  
       tempLoanData[loanNum - 1][currentMonth].amount = event.target.value;
       currentMonth = getNextMonth(currentMonth);
     }
