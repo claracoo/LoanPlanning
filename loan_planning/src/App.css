@@ -69,3 +69,9 @@
 .header {
   height: 40px !important;
 }
+
+.metadataFooter {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+}

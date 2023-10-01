@@ -24,6 +24,8 @@ function App() {
     "#363946",
     "#2C666E"
   ])
+  const [totals, setTotals] = useState({})
+  const [metaTotal, setMetaTotal] = useState(0)
   const [addRowDisabled, setAddRowDisabled] = useState(false)
   const [removeRowDisabled, setRemoveRowDisabled] = useState(true)
 
@@ -37,6 +39,13 @@ function App() {
     setRows(tempLoanData)
     if (field == "initBalance" || field == "interestRate") {
       calcBalanceLeft(index, tempLoanData)
+    }
+    if (field == "initBalance") {
+      let tempMetaTotal = 0;
+      for (let row of rows) {
+        tempMetaTotal = Number(tempMetaTotal) + Number(row.initBalance)
+      }
+      setMetaTotal(tempMetaTotal)
     }
   }
 
@@ -79,7 +88,25 @@ function App() {
       }
       setRows(tempRowData)
       adjustAmountPaidForBeyond0(index, tempRowData);
+      calcTotals()
     }
+  }
+
+  const calcTotals = () => {
+    let tempTotalData = totals
+    for (let month of months) {
+      let amtTotal = 0;
+      let balTotal = 0
+      for (let row of rows) {
+        amtTotal = Number(amtTotal) + Number(row[month].amount)
+        balTotal = Number(balTotal) + Number(row[month].balanceLeft)
+      }
+      tempTotalData[month] = {
+        amount: amtTotal.toFixed(2),
+        balanceLeft: balTotal.toFixed(2)
+      }
+    }
+    setTotals(tempTotalData)
   }
 
   const fillInMonths = () => {
@@ -107,6 +134,16 @@ function App() {
       }
       month = 1;
     }
+
+    let tempTotalData = {}
+    for (let elem of tempMonthData) {
+      tempTotalData[elem] = {
+        amount: 0,
+        balanceLeft: 0
+      };
+    }
+
+    setTotals(tempTotalData)
     setMonths(tempMonthData)
 
     let rowWithMonths = setupMonthsForRows(rows[0], tempMonthData);
@@ -198,6 +235,14 @@ function App() {
     </Fragment>
     ))};
 
+    const totalsData = months.map((month) => 
+      <Fragment key={month}>
+            <td>{totals[month].amount}</td>
+            <td></td>
+            <td>{totals[month].balanceLeft}</td>
+      </Fragment>
+      );
+
 
   const listMetaDataRows = rows.map((row) =>
       <tr key={row.number}>
@@ -282,9 +327,11 @@ function App() {
         </tr>
         {listMetaDataRows}
         <tr>
-          <td className="metadata">
+          <td className="metadata metadataFooter">
             <button disabled={addRowDisabled ? true : false} onClick={addLoan}>+ Add Loan</button>
+            <p>Total Initial Loan Balance: {metaTotal}</p>
           </td>
+          {totalsData}
         </tr>
       </table>
     </div>
